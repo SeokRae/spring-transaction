@@ -56,7 +56,7 @@ class PaymentServiceTest extends AbstractIntegrationTest {
         assertThat(p.getOrderId()).isEqualTo(orderId);
         assertThat(p.getPaymentAmount()).isEqualByComparingTo(paymentAmount);
         assertThat(p.getPaymentMethod()).isEqualTo(paymentMethod);
-        assertThat(p.getPaymentStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(p.getStatus()).isEqualTo(PaymentStatus.PENDING);
       });
 
     // DB에 저장된 결제 정보 확인
@@ -91,7 +91,7 @@ class PaymentServiceTest extends AbstractIntegrationTest {
     assertThat(paymentRepository.findById(payment.getPaymentId()))
       .isPresent()
       .satisfies(p -> {
-        assertThat(p.get().getPaymentStatus()).isEqualTo(PaymentStatus.COMPLETED);
+        assertThat(p.get().getStatus()).isEqualTo(PaymentStatus.COMPLETED);
       });
   }
 
@@ -118,7 +118,7 @@ class PaymentServiceTest extends AbstractIntegrationTest {
     assertThat(paymentRepository.findById(payment.getPaymentId()))
       .isPresent()
       .satisfies(p -> {
-        assertThat(p.get().getPaymentStatus()).isEqualTo(PaymentStatus.FAILED);
+        assertThat(p.get().getStatus()).isEqualTo(PaymentStatus.FAILED);
       });
   }
 
@@ -148,6 +148,33 @@ class PaymentServiceTest extends AbstractIntegrationTest {
         assertThat(p.getOrderId()).isEqualTo(orderId);
         assertThat(p.getPaymentAmount()).isEqualByComparingTo(paymentAmount);
         assertThat(p.getPaymentMethod()).isEqualTo(paymentMethod);
+      });
+  }
+
+  @DisplayName("[결제] 취소 테스트")
+  @Test
+  void cacnelPayment() {
+
+    // Given: 상품 및 주문 생성
+    Product product = Product.createProduct(
+      "Test Product", 10, BigDecimal.valueOf(100.00), "Test Description"
+    );
+    productRepository.save(product);
+
+    Order order = orderService.createOrder(product.getProductId(), 5);
+
+    Long orderId = order.getOrderId();
+    BigDecimal paymentAmount = BigDecimal.valueOf(500.00); // 총 주문 금액
+    String paymentMethod = "card";
+    Payment payment = paymentService.createPayment(orderId, paymentAmount, paymentMethod);
+
+    Payment cancelledPayment = paymentService.cancelPayment(payment.getPaymentId());
+
+    // Then: 결제 상태가 취소로 변경되었는지 확인
+    assertThat(paymentRepository.findById(cancelledPayment.getPaymentId()))
+      .isPresent()
+      .satisfies(p -> {
+        assertThat(p.get().getStatus()).isEqualTo(PaymentStatus.CANCELLED);
       });
   }
 }

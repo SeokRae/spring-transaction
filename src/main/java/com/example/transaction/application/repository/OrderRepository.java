@@ -16,6 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   /**
    * EXISTS를 사용한 효율적인 쿼리
    */
-  @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM Order o WHERE o.productId = :productId AND o.orderStatus = :orderStatus) THEN true ELSE false END")
+  @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM Order o WHERE o.productId = :productId AND o.status = :orderStatus) THEN true ELSE false END")
   boolean existsByProductIdAndOrderStatus(@Param("productId") Long productId, @Param("orderStatus") OrderStatus orderStatus);
 }

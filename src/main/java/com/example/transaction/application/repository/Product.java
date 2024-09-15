@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Setter
 @Getter
 @Entity
-@ToString
+@ToString(of = {"productId", "stockQuantity", "price"})
 @EqualsAndHashCode(of = "productId")
 @Table(name = "products")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,7 +20,6 @@ public class Product {
 
   @Column(nullable = false)
   private String productName;
-
 
   @Column(nullable = false)
   private int stockQuantity;

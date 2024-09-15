@@ -42,7 +42,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
 
     // Given: 주문 생성
     order = Order.createOrder(product, 5);  // 예시로 5개의 상품을 주문
-    order.setOrderStatus(OrderStatus.PAID);  // 주문 상태를 PAID로 설정
+    order.setStatus(OrderStatus.PAID);  // 주문 상태를 PAID로 설정
     orderRepository.save(order);
   }
 
@@ -53,8 +53,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
     Shipment shipment = new Shipment();
     shipment.setOrderId(order.getOrderId());
     shipment.setShipmentDate(LocalDateTime.now());
-    shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
-    shipment.setTrackingNumber("TRACK12345");
+    shipment.setStatus(ShipmentStatus.SHIPPED);
 
     // When: 배송 저장
     Shipment savedShipment = shipmentRepository.save(shipment);
@@ -66,8 +65,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
         assertThat(s.getShipmentId()).isNotNull();
         assertThat(s.getOrderId()).isEqualTo(order.getOrderId());
         assertThat(s.getShipmentDate()).isNotNull();
-        assertThat(s.getShipmentStatus()).isEqualTo(ShipmentStatus.SHIPPED);
-        assertThat(s.getTrackingNumber()).isEqualTo("TRACK12345");
+        assertThat(s.getStatus()).isEqualTo(ShipmentStatus.SHIPPED);
       });
   }
 
@@ -78,8 +76,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
     Shipment shipment = new Shipment();
     shipment.setOrderId(order.getOrderId());
     shipment.setShipmentDate(LocalDateTime.now());
-    shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
-    shipment.setTrackingNumber("TRACK12345");
+    shipment.setStatus(ShipmentStatus.SHIPPED);
     shipmentRepository.save(shipment);
 
     // When: 배송 ID로 조회
@@ -91,8 +88,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
       .satisfies(s -> {
         assertThat(s.get().getShipmentId()).isEqualTo(shipment.getShipmentId());
         assertThat(s.get().getOrderId()).isEqualTo(order.getOrderId());
-        assertThat(s.get().getShipmentStatus()).isEqualTo(ShipmentStatus.SHIPPED);
-        assertThat(s.get().getTrackingNumber()).isEqualTo("TRACK12345");
+        assertThat(s.get().getStatus()).isEqualTo(ShipmentStatus.SHIPPED);
       });
   }
 
@@ -103,8 +99,7 @@ class ShipmentRepositoryTest extends AbstractIntegrationTest {
     Shipment shipment = new Shipment();
     shipment.setOrderId(order.getOrderId());
     shipment.setShipmentDate(LocalDateTime.now());
-    shipment.setShipmentStatus(ShipmentStatus.SHIPPED);
-    shipment.setTrackingNumber("TRACK12345");
+    shipment.setStatus(ShipmentStatus.SHIPPED);
     shipmentRepository.save(shipment);
 
     // When: 배송 삭제

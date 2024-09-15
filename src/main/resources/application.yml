@@ -16,17 +16,17 @@ spring:
 #        generate_statistics: true  # Hibernate 통계를 생성할지 여부
 
 
-logging:
-  level:
-    org:
-      hibernate:
-        orm:
-          jdbc:
-            bind: TRACE  # JDBC 바인딩 로그 레벨 설정
-        SQL: INFO # SQL 쿼리 로그 레벨 설정
-        transaction: TRACE # 트랜잭션 로그 레벨 설정
-
-    org.springframework.transaction: TRACE  # 트랜잭션 관리에 대한 로그
-    org.springframework.transaction.interceptor: TRACE  # 트랜잭션 인터셉터 관련 로그
-    org.springframework.transaction.support.TransactionSynchronizationManager: TRACE  # 트랜잭션 동기화 관련 로그
-    org.springframework.orm.jpa.JpaTransactionManager: TRACE  # JPA 트랜잭션 매니저 로그
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        orm:
+#          jdbc:
+#            bind: TRACE  # JDBC 바인딩 로그 레벨 설정
+#        SQL: INFO # SQL 쿼리 로그 레벨 설정
+#        transaction: TRACE # 트랜잭션 로그 레벨 설정
+#
+#    org.springframework.transaction: TRACE  # 트랜잭션 관리에 대한 로그
+#    org.springframework.transaction.interceptor: TRACE  # 트랜잭션 인터셉터 관련 로그
+#    org.springframework.transaction.support.TransactionSynchronizationManager: TRACE  # 트랜잭션 동기화 관련 로그
+#    org.springframework.orm.jpa.JpaTransactionManager: TRACE  # JPA 트랜잭션 매니저 로그

@@ -49,10 +49,9 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
   void createShipmentTest() {
     // Given: 주문 ID와 추적 번호
     Long orderId = order.getOrderId();
-    String trackingNumber = "TRACK12345";
 
     // When: 배송 생성
-    Shipment shipment = shipmentService.createShipment(orderId, trackingNumber);
+    Shipment shipment = shipmentService.createShipment(orderId);
 
     // Then: 배송 정보 검증
     assertThat(shipment)
@@ -60,8 +59,7 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
       .satisfies(s -> {
         assertThat(s.getShipmentId()).isNotNull();
         assertThat(s.getOrderId()).isEqualTo(orderId);
-        assertThat(s.getShipmentStatus()).isEqualTo(ShipmentStatus.PENDING);  // 초기 상태는 PENDING
-        assertThat(s.getTrackingNumber()).isEqualTo(trackingNumber);
+        assertThat(s.getStatus()).isEqualTo(ShipmentStatus.PENDING);  // 초기 상태는 PENDING
       });
   }
 
@@ -69,7 +67,7 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
   @Test
   void getShipmentByIdTest() {
     // Given: 배송 생성
-    Shipment shipment = shipmentService.createShipment(order.getOrderId(), "TRACK12345");
+    Shipment shipment = shipmentService.createShipment(order.getOrderId());
 
     // When: 배송 ID로 조회
     Shipment foundShipment = shipmentService.getShipmentById(shipment.getShipmentId());
@@ -80,8 +78,7 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
       .satisfies(s -> {
         assertThat(s.getShipmentId()).isEqualTo(shipment.getShipmentId());
         assertThat(s.getOrderId()).isEqualTo(order.getOrderId());
-        assertThat(s.getTrackingNumber()).isEqualTo("TRACK12345");
-        assertThat(s.getShipmentStatus()).isEqualTo(ShipmentStatus.PENDING);
+        assertThat(s.getStatus()).isEqualTo(ShipmentStatus.PENDING);
       });
   }
 
@@ -89,23 +86,23 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
   @Test
   void cancelShipmentTest() {
     // Given: 배송 생성
-    Shipment shipment = shipmentService.createShipment(order.getOrderId(), "TRACK12345");
+    Shipment shipment = shipmentService.createShipment(order.getOrderId());
 
     // When: 배송 취소
     shipmentService.cancelShipment(shipment.getShipmentId());
 
     // Then: 취소된 배송 정보 검증
     Shipment cancelledShipment = shipmentService.getShipmentById(shipment.getShipmentId());
-    assertThat(cancelledShipment.getShipmentStatus()).isEqualTo(ShipmentStatus.CANCELLED);
+    assertThat(cancelledShipment.getStatus()).isEqualTo(ShipmentStatus.CANCELLED);
   }
 
   @DisplayName("[배송] 취소 실패 테스트 - 이미 배송 완료된 경우")
   @Test
   void cancelShipmentFailTest() {
     // Given: 배송 생성 후 완료 처리
-    Shipment shipment = shipmentService.createShipment(order.getOrderId(), "TRACK12345");
+    Shipment shipment = shipmentService.createShipment(order.getOrderId());
 
-    shipmentService.shipShipment(shipment.getShipmentId(), "TRACK12345");
+    shipmentService.shipShipment(shipment.getShipmentId());
 
     shipmentService.completeShipment(shipment.getShipmentId());
 
@@ -119,23 +116,23 @@ class ShipmentServiceTest extends AbstractIntegrationTest {
   @Test
   void completeShipmentTest() {
     // Given: 배송 생성
-    Shipment shipment = shipmentService.createShipment(order.getOrderId(), "TRACK12345");
+    Shipment shipment = shipmentService.createShipment(order.getOrderId());
 
     // When: 배송 시작 처리
-    shipmentService.shipShipment(shipment.getShipmentId(), "TRACK12345");
+    shipmentService.shipShipment(shipment.getShipmentId());
     // When: 배송 완료 처리
     shipmentService.completeShipment(shipment.getShipmentId());
 
     // Then: 배송 완료 정보 검증
     Shipment completedShipment = shipmentService.getShipmentById(shipment.getShipmentId());
-    assertThat(completedShipment.getShipmentStatus()).isEqualTo(ShipmentStatus.DELIVERED);
+    assertThat(completedShipment.getStatus()).isEqualTo(ShipmentStatus.DELIVERED);
   }
 
   @DisplayName("[배송] 완료 실패 테스트 - 배송되지 않은 상태에서 완료 처리 불가")
   @Test
   void completeShipmentFailTest() {
     // Given: 배송 생성
-    Shipment shipment = shipmentService.createShipment(order.getOrderId(), "TRACK12345");
+    Shipment shipment = shipmentService.createShipment(order.getOrderId());
 
     // Then: PENDING 상태에서는 완료 처리 불가
     assertThatThrownBy(() -> shipmentService.completeShipment(shipment.getShipmentId()))

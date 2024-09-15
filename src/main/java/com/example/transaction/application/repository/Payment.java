@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Builder
+@ToString(of = {"paymentId", "orderId", "paymentAmount", "status"})
 @AllArgsConstructor
 @Table(name = "payments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,7 +41,7 @@ public class Payment {
    * - FAILED: 결제 시도가 실패했습니다.
    */
   @Enumerated(EnumType.STRING)
-  private PaymentStatus paymentStatus;
+  private PaymentStatus status;
 
   /**
    * 결제 수단을 나타냅니다.
@@ -57,17 +58,14 @@ public class Payment {
    * @return 생성된 Payment 객체
    */
   public static Payment createPayment(Long orderId, BigDecimal paymentAmount, String paymentMethod) {
-    if (orderId == null) {
-      throw new IllegalArgumentException("주문 ID가 필요합니다.");
-    }
-    if (paymentAmount == null || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
-      throw new IllegalArgumentException("결제 금액은 0보다 커야 합니다.");
-    }
+    validateOrderId(orderId);
+    validatePaymentAmount(paymentAmount);
+
     return Payment.builder()
       .orderId(orderId)
       .paymentAmount(paymentAmount)
       .paymentMethod(paymentMethod)
-      .paymentStatus(PaymentStatus.PENDING)
+      .status(PaymentStatus.PENDING)
       .paymentDate(LocalDateTime.now())
       .build();
   }
@@ -76,19 +74,54 @@ public class Payment {
    * 결제 완료 처리
    */
   public void completePayment() {
-    if (this.paymentStatus == PaymentStatus.COMPLETED) {
+    if (this.status == PaymentStatus.COMPLETED) {
       throw new IllegalStateException("이미 완료된 결제입니다.");
     }
-    this.paymentStatus = PaymentStatus.COMPLETED;
+    if (this.status == PaymentStatus.CANCELLED) {
+      throw new IllegalStateException("취소된 결제는 완료할 수 없습니다.");
+    }
+    this.status = PaymentStatus.COMPLETED;
+    this.paymentDate = LocalDateTime.now();  // 결제 완료 시점 업데이트
   }
 
   /**
    * 결제 실패 처리
    */
   public void failPayment() {
-    if (this.paymentStatus == PaymentStatus.FAILED) {
+    if (this.status == PaymentStatus.FAILED) {
       throw new IllegalStateException("이미 실패한 결제입니다.");
     }
-    this.paymentStatus = PaymentStatus.FAILED;
+    if (this.status == PaymentStatus.CANCELLED) {
+      throw new IllegalStateException("취소된 결제는 실패 처리할 수 없습니다.");
+    }
+    this.status = PaymentStatus.FAILED;
+    this.paymentDate = LocalDateTime.now();  // 결제 실패 시점 업데이트
+  }
+
+  /**
+   * 결제 취소 처리
+   */
+  public void cancelPayment() {
+    if (this.status == PaymentStatus.COMPLETED) {
+      throw new IllegalStateException("이미 완료된 결제는 취소할 수 없습니다.");
+    }
+    if (this.status == PaymentStatus.CANCELLED) {
+      throw new IllegalStateException("이미 취소된 결제입니다.");
+    }
+    this.status = PaymentStatus.CANCELLED;
+    this.paymentDate = LocalDateTime.now();  // 결제 취소 시점 업데이트
+  }
+
+  // Private validation methods for reusability and cleaner code
+  private static void validateOrderId(Long orderId) {
+    if (orderId == null) {
+      throw new IllegalArgumentException("주문 ID가 필요합니다.");
+    }
+  }
+
+  private static void validatePaymentAmount(BigDecimal paymentAmount) {
+    if (paymentAmount == null || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new IllegalArgumentException("결제 금액은 0보다 커야 합니다.");
+    }
   }
 }

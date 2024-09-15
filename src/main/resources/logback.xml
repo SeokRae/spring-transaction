@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- %red([%thread])-->
+    <property name="STDOUT_FORMAT"
+              value="[%d{yyyy-MM-dd HH:mm:ss.SSS}] %highlight([%-5level]) [%-45.45logger{39}.%-30.30method:%cyan(%-3.3line)] - [%X{transactionId}] %msg%n"/>
+
+    <!-- Console appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${STDOUT_FORMAT}</pattern>
+        </encoder>
+    </appender>
+
+    <logger level="OFF" name="ch.qos.logback"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

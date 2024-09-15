@@ -12,6 +12,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
    * @param paymentStatus 결제 상태 (주로 COMPLETED)
    * @return 완료된 결제가 존재하는지 여부
    */
-  @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM Payment p WHERE p.orderId = :orderId AND p.paymentStatus = :paymentStatus) THEN true ELSE false END")
+  @Query("SELECT CASE WHEN EXISTS (SELECT 1 FROM Payment p WHERE p.orderId = :orderId AND p.status = :paymentStatus) THEN true ELSE false END")
   boolean existsByOrderIdAndPaymentStatus(@Param("orderId") Long orderId, @Param("paymentStatus") PaymentStatus paymentStatus);
 }

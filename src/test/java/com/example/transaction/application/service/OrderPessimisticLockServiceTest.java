@@ -71,7 +71,7 @@ class OrderPessimisticLockServiceTest extends AbstractIntegrationTest {
     Order canceledOrder = orderPessimisticLockService.cancelOrder(order.getOrderId());
 
     // Then: 주문 상태가 취소되고, 재고가 복원되었는지 확인
-    assertThat(canceledOrder.getOrderStatus()).isEqualTo(OrderStatus.CANCELLED);
+    assertThat(canceledOrder.getStatus()).isEqualTo(OrderStatus.CANCELLED);
 
     Product updatedProduct = productRepository.findById(product.getProductId()).orElseThrow();
     assertThat(updatedProduct.getStockQuantity()).isEqualTo(10); // 재고 복원 확인

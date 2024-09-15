@@ -116,6 +116,6 @@ class OrderPessimisticLockServiceConcurrencyTest extends AbstractIntegrationTest
 
     // 결제 완료 후 주문 상태 확인
     Order updatedOrder = orderPessimisticLockService.getOrderById(order.getOrderId());
-    assertThat(updatedOrder.getOrderStatus()).isEqualTo(OrderStatus.PAID);  // 주문 상태가 PAID로 변경됨
+    assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.PAID);  // 주문 상태가 PAID로 변경됨
   }
 }

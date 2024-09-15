@@ -6,9 +6,11 @@ import com.example.transaction.application.repository.OrderStatus;
 import com.example.transaction.application.repository.Product;
 import com.example.transaction.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderPessimisticLockService {
@@ -36,7 +38,9 @@ public class OrderPessimisticLockService {
     Order order = Order.createOrder(product, quantity);
 
     // 주문 저장
-    return orderRepository.save(order);
+    Order save = orderRepository.save(order);
+    log.info("[OrderPessimisticLockService] 주문 생성: {}", save);
+    return save;
   }
 
   /**
@@ -48,13 +52,15 @@ public class OrderPessimisticLockService {
     Order order = orderRepository.findByIdWithLock(orderId)
       .orElseThrow(() -> new ResourceNotFoundException("주문을 찾을 수 없습니다. 주문 ID: " + orderId));
     // 이미 결제된 주문은 중복 결제 방지
-    if (order.getOrderStatus() == OrderStatus.PAID) {
+    if (order.getStatus() == OrderStatus.PAID) {
       throw new IllegalStateException("이미 결제된 주문입니다.");
     }
     // 결제 처리
     order.payForOrder();
     // 결제 처리 후 변경된 주문 저장
-    return orderRepository.save(order);
+    Order save = orderRepository.save(order);
+    log.info("[OrderPessimisticLockService] 주문 결제: {}", save);
+    return save;
   }
 
   /**
@@ -67,14 +73,16 @@ public class OrderPessimisticLockService {
       .orElseThrow(() -> new ResourceNotFoundException("주문을 찾을 수 없습니다. 주문 ID: " + orderId));
 
     // 이미 배송된 주문은 중복 배송 방지
-    if (order.getOrderStatus() == OrderStatus.SHIPPED) {
+    if (order.getStatus() == OrderStatus.SHIPPED) {
       throw new IllegalStateException("이미 배송된 주문입니다.");
     }
 
     // 배송 처리
     order.shipOrder();
     // 배송 처리 후 변경된 주문 저장
-    return orderRepository.save(order);
+    Order save = orderRepository.save(order);
+    log.info("[OrderPessimisticLockService] 주문 배송: {}", save);
+    return save;
   }
 
   /**
@@ -87,7 +95,7 @@ public class OrderPessimisticLockService {
       .orElseThrow(() -> new ResourceNotFoundException("주문을 찾을 수 없습니다. 주문 ID: " + orderId));
 
     // 이미 취소된 주문은 중복 취소 방지
-    if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+    if (order.getStatus() == OrderStatus.CANCELLED) {
       throw new IllegalStateException("이미 취소된 주문입니다.");
     }
 
@@ -98,7 +106,9 @@ public class OrderPessimisticLockService {
     order.cancelOrder(product);
 
     // 변경된 주문 저장
-    return orderRepository.save(order);
+    Order save = orderRepository.save(order);
+    log.info("[OrderPessimisticLockService] 주문 취소: {}", save);
+    return save;
   }
 
   /**

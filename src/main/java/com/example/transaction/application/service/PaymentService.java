@@ -5,11 +5,13 @@ import com.example.transaction.application.repository.PaymentRepository;
 import com.example.transaction.application.repository.PaymentStatus;
 import com.example.transaction.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -37,9 +39,11 @@ public class PaymentService {
     Payment payment = Payment.createPayment(orderId, paymentAmount, paymentMethod);
 
     // 결제 정보 저장
-    return paymentRepository.save(payment);
+    Payment save = paymentRepository.save(payment);
+    log.info("[PaymentService] 결제 생성: {}", save);
+    return save;
   }
-  
+
   /**
    * 결제 완료 처리
    *
@@ -53,7 +57,9 @@ public class PaymentService {
 
     payment.completePayment();
 
-    return paymentRepository.save(payment);
+    Payment save = paymentRepository.save(payment);
+    log.info("[PaymentService] 결제 완료: {}", save);
+    return save;
   }
 
   /**
@@ -68,7 +74,28 @@ public class PaymentService {
       .orElseThrow(() -> new ResourceNotFoundException("결제 정보를 찾을 수 없습니다. 결제 ID: " + paymentId));
 
     payment.failPayment();
-    return paymentRepository.save(payment);
+    Payment save = paymentRepository.save(payment);
+    log.info("[PaymentService] 결제 실패: {}", save);
+    return save;
+  }
+
+  /**
+   * 결제 취소 처리
+   *
+   * @param paymentId 결제 ID
+   * @return 취소된 Payment 객체
+   */
+  @Transactional
+  public Payment cancelPayment(Long paymentId) {
+    Payment payment = paymentRepository.findById(paymentId)
+      .orElseThrow(() -> new ResourceNotFoundException("결제 정보를 찾을 수 없습니다. 결제 ID: " + paymentId));
+
+    // 결제 취소 처리
+    payment.cancelPayment();
+
+    Payment save = paymentRepository.save(payment);
+    log.info("[PaymentService] 결제 취소: {}", save);
+    return save;
   }
 
   /**
@@ -79,7 +106,9 @@ public class PaymentService {
    */
   @Transactional(readOnly = true)
   public Payment getPaymentById(Long paymentId) {
-    return paymentRepository.findById(paymentId)
+    Payment payment = paymentRepository.findById(paymentId)
       .orElseThrow(() -> new ResourceNotFoundException("결제 정보를 찾을 수 없습니다. 결제 ID: " + paymentId));
+    log.info("[PaymentService] 결제 조회: {}", payment);
+    return payment;
   }
 }

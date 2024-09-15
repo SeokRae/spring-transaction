@@ -4,9 +4,11 @@ import com.example.transaction.application.repository.Shipment;
 import com.example.transaction.application.repository.ShipmentRepository;
 import com.example.transaction.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShipmentService {
@@ -18,28 +20,32 @@ public class ShipmentService {
    * 외부에서 주문을 조회한 후 orderId와 trackingNumber를 전달받아 처리
    */
   @Transactional
-  public Shipment createShipment(Long orderId, String trackingNumber) {
+  public Shipment createShipment(Long orderId) {
     // 배송 생성 (Order는 외부에서 조회하여 전달받음)
-    Shipment shipment = Shipment.createShipment(orderId, trackingNumber);
+    Shipment shipment = Shipment.createShipment(orderId);
 
     // 배송 저장
-    return shipmentRepository.save(shipment);
+    Shipment save = shipmentRepository.save(shipment);
+    log.info("[ShipmentService] 배송 생성: {}", save);
+    return save;
   }
 
   /**
    * 배송 시작
    */
   @Transactional
-  public Shipment shipShipment(Long shipmentId, String trackingNumber) {
+  public Shipment shipShipment(Long shipmentId) {
     // 배송 조회
     Shipment shipment = shipmentRepository.findById(shipmentId)
       .orElseThrow(() -> new ResourceNotFoundException("배송 정보를 찾을 수 없습니다. 배송 ID: " + shipmentId));
 
     // 도메인 로직 호출
-    shipment.ship(trackingNumber);
+    shipment.ship();
 
     // 변경된 상태 저장
-    return shipmentRepository.save(shipment);
+    Shipment save = shipmentRepository.save(shipment);
+    log.info("[ShipmentService] 배송 시작: {}", save);
+    return save;
   }
 
   /**
@@ -55,7 +61,8 @@ public class ShipmentService {
     shipment.cancelShipment();
 
     // 변경된 상태 저장
-    shipmentRepository.save(shipment);
+    Shipment save = shipmentRepository.save(shipment);
+    log.info("[ShipmentService] 배송 취소: {}", save);
   }
 
   /**
@@ -79,7 +86,9 @@ public class ShipmentService {
    */
   @Transactional(readOnly = true)
   public Shipment getShipmentById(Long shipmentId) {
-    return shipmentRepository.findById(shipmentId)
+    Shipment shipment = shipmentRepository.findById(shipmentId)
       .orElseThrow(() -> new ResourceNotFoundException("배송 정보를 찾을 수 없습니다. 배송 ID: " + shipmentId));
+    log.info("[ShipmentService] 배송 조회: {}", shipment);
+    return shipment;
   }
 }
